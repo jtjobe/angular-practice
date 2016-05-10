@@ -45,6 +45,19 @@ router.param('post', function(req, res, next, id){
   });
 });
 
+/* Middleware function to retrieve Comment object */
+router.param('comment', function(req, res, next, id) {
+  var query = Comment.findById(id);
+
+  query.exec(function (err, post) {
+    if (err) { return next(err); }
+    if (!post) { return next(new Error('can\'t find comment')); }
+
+    req.post = post;
+    return next();
+  });
+});
+
 /* To retrieve a single Post */
 router.get('/posts/:post', function(req, res, next) {
   req.post.populate('comments', function(err, post) {
@@ -81,18 +94,7 @@ router.post('/posts/:post/comments', function(req, res, next) {
   });
 });
 
-/* Middleware function to retrieve Comment object */
-router.param('comment', function(req, res, next, id) {
-  var query = Comment.findById(id);
 
-  query.exec(function (err, post) {
-    if (err) { return next(err); }
-    if (!post) { return next(new Error('can\'t find comment')); }
-
-    req.post = post;
-    return next();
-  });
-});
 
 /* To upvote a Post */
 router.put('/posts/:post/upvote', function(req, res, next) {
@@ -106,7 +108,7 @@ router.put('/posts/:post/upvote', function(req, res, next) {
 
 router.put('posts/:post/comments/:comment/upvote', function(req, res, next) {
   req.comment.upvote(function(err, comment) {
-    if(err) { return next(err;) }
+    if(err) { return next(err); }
 
     res.json(comment);
   });
